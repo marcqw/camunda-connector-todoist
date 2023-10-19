@@ -1,0 +1,341 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+  "name": "Todoist Connector Template",
+  "id": "e92fd9ad-afe8-4044-bee1-a94cb822191a",
+  "version": 1697727021099,
+  "description": "Manage Todoist's projects, sections and tasks",
+  "icon": {
+    "contents": "https://static-00.iconduck.com/assets.00/todoist-icon-2048x2048-6xd8pwo3.png"
+  },
+  "documentationRef": "https://github.com/marcqw/camunda-connector-todoist/",
+  "category": {
+    "id": "connectors",
+    "name": "Connectors"
+  },
+  "appliesTo": [
+    "bpmn:Task"
+  ],
+  "elementType": {
+    "value": "bpmn:ServiceTask"
+  },
+  "groups": [
+    {
+      "id": "operation",
+      "label": "Operation"
+    },
+    {
+      "id": "input",
+      "label": "Input"
+    },
+    {
+      "id": "authentication",
+      "label": "Authentication"
+    },
+    {
+      "id": "output",
+      "label": "Output mapping"
+    },
+    {
+      "id": "error",
+      "label": "Error handling"
+    }
+  ],
+  "properties": [
+    {
+      "value": "io.camunda:http-json:1",
+      "binding": {
+        "type": "zeebe:taskDefinition:type"
+      },
+      "type": "Hidden"
+    },
+    {
+      "label": "Operation group",
+      "id": "operationGroup",
+      "group": "operation",
+      "description": "Choose operation group",
+      "value": "projects",
+      "type": "Dropdown",
+      "choices": [
+        {
+          "name": "Projects",
+          "value": "projects"
+        },
+        {
+          "name": "Sections",
+          "value": "sections"
+        },
+        {
+          "name": "Tasks",
+          "value": "tasks"
+        }
+      ],
+      "binding": {
+        "type": "zeebe:input",
+        "name": "operationGroup"
+      }
+    },
+    {
+      "label": "Operation type",
+      "id": "operationType",
+      "group": "operation",
+      "type": "Dropdown",
+      "value": "getAllProjects",
+      "choices": [
+        {
+          "name": "Create a new project",
+          "value": "createProject"
+        },
+        {
+          "name": "Get all projects",
+          "value": "getAllProjects"
+        },
+        {
+          "name": "Get a project",
+          "value": "getProject"
+        },
+        {
+          "name": "Get all collaborators",
+          "value": "getAllCollaborators"
+        },
+        {
+          "name": "Update a project",
+          "value": "updateProject"
+        },
+        {
+          "name": "Delete a project",
+          "value": "deleteProject"
+        }
+      ],
+      "condition": {
+        "property": "operationGroup",
+        "oneOf": [
+          "projects"
+        ]
+      },
+      "binding": {
+        "type": "zeebe:input",
+        "name": "operationType"
+      }
+    },
+    {
+      "type": "Hidden",
+      "id": "authentication.type",
+      "value": "bearer",
+      "group": "authentication",
+      "binding": {
+        "name": "authentication.type",
+        "type": "zeebe:input"
+      }
+    },
+    {
+      "id": "authentication.token",
+      "type": "String",
+      "label": "Todoist API Key",
+      "optional": false,
+      "constraints": {
+        "notEmpty": true
+      },
+      "feel": "optional",
+      "group": "authentication",
+      "binding": {
+        "name": "authentication.token",
+        "type": "zeebe:input"
+      }
+    },
+    {
+      "id": "methodGet",
+      "group": "configuration",
+      "type": "Hidden",
+      "value": "GET",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "method"
+      },
+      "condition": {
+        "property": "operationType",
+        "oneOf": [
+          "getAllProjects",
+          "getProject",
+          "getAllCollaborators",
+          "getActiveTasks",
+          "getTask"
+        ]
+      }
+    },
+    {
+      "id": "methodPost",
+      "group": "configuration",
+      "type": "Hidden",
+      "value": "post",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "method"
+      },
+      "condition": {
+        "property": "operationType",
+        "oneOf": [
+          "createProject",
+          "updateProject",
+          "createSection",
+          "updateSection",
+          "createTask",
+          "updateTask",
+          "closeTask",
+          "reopenTask"
+        ]
+      }
+    },
+    {
+      "id": "methodDelete",
+      "group": "configuration",
+      "type": "Hidden",
+      "value": "delete",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "method"
+      },
+      "condition": {
+        "property": "operationType",
+        "oneOf": [
+          "deleteProject",
+          "deleteSection",
+          "deleteTask"
+        ]
+      }
+    },
+    {
+      "label": "Project's ID",
+      "description": "The ID that identifies the project",
+      "feel": "optional",
+      "group": "input",
+      "type": "String",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "projectId"
+      },
+      "constraints": {
+        "notEmpty": true
+      },
+      "condition": {
+        "property": "operationType",
+        "oneOf": [
+          "getProject",
+          "updateProject",
+          "deleteProject"
+        ]
+      }
+    },
+    {
+      "label": "Project's Name",
+      "description": "The name of the project",
+      "feel": "optional",
+      "group": "input",
+      "type": "String",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "projectName"
+      },
+      "constraints": {
+        "notEmpty": true
+      },
+      "condition": {
+        "property": "operationType",
+        "oneOf": [
+          "createProject",
+          "updateProject"
+        ]
+      }
+    },
+    {
+      "type": "Hidden",
+      "value": "={\"name\": projectName }",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "body"
+      },
+      "condition": {
+        "property": "operationType",
+        "oneOf": [
+          "createProject",
+          "updateProject"
+        ]
+      }
+    },
+    {
+      "type": "Hidden",
+      "value": "=\"https://api.todoist.com/rest/v2\"",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "baseUrl"
+      }
+    },
+    {
+      "type": "Hidden",
+      "value": "=baseUrl + \"/projects\"",
+      "binding": {
+        "name": "url",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "operationType",
+        "oneOf": [
+          "getAllProjects",
+          "createProject"
+        ]
+      }
+    },
+    {
+      "type": "Hidden",
+      "value": "=baseUrl + \"/projects/\" + projectId",
+      "binding": {
+        "name": "url",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "operationType",
+        "oneOf": [
+          "getProject",
+          "updateProject",
+          "deleteProject"
+        ]
+      }
+    },
+    {
+      "id": "resultVariable",
+      "label": "Result variable",
+      "description": "Name of variable to store the response in",
+      "group": "output",
+      "value": "allProjects",
+      "binding": {
+        "key": "resultVariable",
+        "type": "zeebe:taskHeader"
+      },
+      "type": "String"
+    },
+    {
+      "id": "resultExpression",
+      "label": "Result expression",
+      "description": "Expression to map the response into process variables",
+      "feel": "required",
+      "group": "output",
+      "value": "={allProjects: response.body}",
+      "binding": {
+        "key": "resultExpression",
+        "type": "zeebe:taskHeader"
+      },
+      "type": "Text"
+    },
+    {
+      "id": "errorExpression",
+      "label": "Error expression",
+      "description": "Expression to handle errors. Details in the <a href=\"https://docs.camunda.io/docs/components/connectors/use-connectors/\" target=\"_blank\">documentation</a>.",
+      "feel": "required",
+      "group": "error",
+      "binding": {
+        "key": "errorExpression",
+        "type": "zeebe:taskHeader"
+      },
+      "type": "Text"
+    }
+  ]
+}
